@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "skills": {
+    "roblox-animations": {
+      "source": "sentinelcore/roblox-skills",
+      "sourceType": "github",
+      "computedHash": "66b027e98b5f5c67aed452aea94e2a58967334b04b3476fc1cfc390ca251f982"
+    },
+    "roblox-design-consultant": {
+      "source": "ohzw/roblox-dev-skills",
+      "sourceType": "github",
+      "computedHash": "9d7e2424d314298c0c33701edd45beab7d52d149033d072407951a19687a254e"
+    },
+    "roblox-performance": {
+      "source": "sentinelcore/roblox-skills",
+      "sourceType": "github",
+      "computedHash": "79126906a98171e7cc2c9847c5aaa208afb61c4cab14b45cb1a97aebc98c5c0f"
+    }
+  }
+}

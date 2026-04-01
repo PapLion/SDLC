@@ -1,0 +1,36 @@
+# Session artifacts
+.copilot/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+logs/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Dependencies (if added later)
+node_modules/
+__pycache__/
+*.pyc
+.pytest_cache/
+venv/
+env/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak

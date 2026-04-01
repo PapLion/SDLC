@@ -1,0 +1,35 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest"],
+      "enabled": true,
+      "type": "local"
+    },
+    "open-web-search": {
+      "command": "npx",
+      "args": ["-y", "open-websearch@latest"],
+      "enabled": true,
+      "type": "local"
+    },
+    "context7": {
+      "enabled": true,
+      "type": "http",
+      "url": "https://mcp.context7.com/mcp"
+    },
+    "engram": {
+      "command": "engram",
+      "args": [
+        "mcp"
+      ],
+      "enabled": true,
+      "type": "local"
+    },
+    "roblox-studio": {
+      "type": "local",
+      "command": "node",
+      "args": ["C:/Users/Dani/Desktop/robloxstudio-mcp-main/packages/robloxstudio-mcp/dist/index.js"],
+      "enabled": true
+    }
+  }
+}
