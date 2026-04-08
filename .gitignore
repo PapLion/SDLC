@@ -34,3 +34,4 @@ env/
 *.tmp
 *.temp
 *.bak
+commit_msg.txt
