@@ -239,3 +239,10 @@ El HITL no termina con el deploy. En la fase de operación:
 *Versión: 3.0 | 2026-04-07*
 *Este archivo es la constitución personal de trabajo con IA. El agente lo lee para entender cuándo ejecutar y cuándo pausar.*
 *Referencias: AGENTS.md, EXTRACTION-PROMPT.md, GAPS-PROMPT.md, RESOLVER-PROMPT.md, INFRA.md, DEPLOY.md, OPERATIONS.md, COLLABORATION.md, SCOPE-MANAGEMENT.md*
+
+## 11. Roblox workflow y herramientas de "co-thinking"
+
+- **Herramientas:** Uso tanto el Roblox Studio oficial (interactivo) como `robloxstudio-mcp` (https://github.com/boshyxd/robloxstudio-mcp) para flujos automatizados, integración con MCP y pruebas en CI-like workflows.
+- **Roles de las herramientas:** Preferir Roblox Studio para diseño interactivo y depuración manual; usar `robloxstudio-mcp` para runs automatizados, pipelines y tareas repetibles.
+- **Modelos/co-thinking:** `Copilot` es la herramienta principal para generación e implementación de código dentro del repositorio. `Claude Web` se usa como "co-thinker" cuando se necesita brainstorming, generación de boilerplate, o trabajo de diseño de alto nivel en game dev/Roblox. No reemplaza a Copilot en implementaciones, pero es la herramienta preferida para ideas, arquitectura de gameplay y tareas conceptuales.
+- **Persistencia:** Cuando una decisión de diseño o una resolución importante se toma con `Claude Web`, el agente debe registrar un resumen en Engram (topic_key sugerido: `tools/claude-web`) y en el artefacto correspondiente (`RESOLVER-GAPS.md`, `ROADMAP.md`, o el doc relevante) para trazabilidad.
