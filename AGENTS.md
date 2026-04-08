@@ -37,6 +37,15 @@ Mi filosofía:
 - **github-mcp-server** — GitHub readonly
 - **ide** — Integración con VS Code
 
+**Nota sobre MCPs para Roblox:**
+
+- En este entorno se usan dos MCPs distintos para tareas relacionadas con Roblox: `roblox-studio` (integración con el Roblox Studio oficial, orientado a diseño interactivo y depuración manual) y `robloxstudio-mcp` (https://github.com/boshyxd/robloxstudio-mcp) para flujos automatizados, pipelines y ejecuciones reproducibles en CI.
+- **Regla para agentes:** Cuando detectes artefactos o tareas de Roblox, inspeccioná las herramientas disponibles y elegí el flujo apropiado:
+        - Si la tarea requiere interacción, inspección visual, o debugging manual → preferir `roblox-studio`.
+        - Si la tarea requiere runs automatizados, scripting reproducible, pruebas en pipeline o integración con CI → preferir `robloxstudio-mcp`.
+- **Decisiones y trazabilidad:** Si una decisión de diseño o resolución se genera con `Claude Web` o por interacción entre MCPs, guardá un resumen en Engram (topic_key sugerido: `tools/roblox` o `tools/claude-web`) y referencialo en el artefacto correspondiente (`RESOLVER-GAPS.md`, `ROADMAP.md`, etc.).
+
+
 ### Skills activas (GitHub Copilot)
 **Project skills:** animation-designer, animation-micro-interaction-pack, frontend-ui-ux-engineer, penpot-uiux-design, react-nextjs-patterns, roblox-game-development, tailwindcss-animations, tdd, test-driven-development, ui-ux-pro-max, roblox-animations, roblox-design-consultant, roblox-performance
 

@@ -27,6 +27,15 @@
     },
     "roblox-studio": {
       "type": "local",
+      "command": "cmd.exe",
+      "args": [
+        "/c",
+        "%LOCALAPPDATA%\\Roblox\\mcp.bat"
+      ],
+      "enabled": true
+    },
+    "roblox-studio-local": {
+      "type": "local",
       "command": "node",
       "args": ["C:/Users/Dani/Desktop/robloxstudio-mcp-main/packages/robloxstudio-mcp/dist/index.js"],
       "enabled": true
