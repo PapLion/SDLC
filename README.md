@@ -98,6 +98,22 @@ CLIENT TEXT → CLIENT-REQS → GAPS → RESOLVER-GAPS → ARCHITECT
 
 ---
 
+##  El Problema del Loop Infinito (resumen desde HITL)
+
+El loop infinito de "revisá de nuevo, encontré algo más" ocurre porque **el modelo busca en un espacio infinito de posibles problemas**. Sin criterios formales de "completo", el proceso no termina nunca.
+
+La solución es documentos firmados con criterios de completitud medibles:
+
+```
+Sin firma → espacio infinito → loop eterno
+Con firma → espacio cerrado → proceso determinista
+```
+
+**Regla:** Después de la firma, si la IA "encuentra algo nuevo", no entra al documento actual. Va a la siguiente versión con fecha y trazabilidad. La versión firmada es inmutable.
+
+**Criterio de cierre del SDLC como sistema:** El SDLC está completo contra el modelo de 7 fases con roles. Cualquier cosa que la IA "encuentre" que no tenga fuente en ese modelo no es un gap real — es opinión. Ver `AGENTS.md` sección SDLC para el mapeo completo de fases.
+
+
 **Versión**: 1.0  
 **Autor**: Dani  
 **Última actualización**: Marzo 2026
