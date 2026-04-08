@@ -103,3 +103,18 @@ CLIENT TEXT → CLIENT-REQS → GAPS → RESOLVER-GAPS → ARCHITECT
 **Última actualización**: Marzo 2026
 
 *Si hay contradicción entre este README y AGENTS.md, AGENTS.md gana.*
+
+## ⚠️ Nota sobre el repositorio SDLC (documentación canónica)
+
+Este repositorio es el repositorio base del SDLC. A diferencia de proyectos producto donde se suele ignorar la carpeta de procesos, aquí las guías y documentos del proceso se versionan y se mantienen como fuente oficial. Sigue las pautas de `GITIGNORE-GUIDE.md` para proyectos, pero en este repositorio:
+- No ignores los documentos de SDLC: `Practice/`, `Metodology/`, `Theory/`, `AGENTS.md`, `HITL.md`, `skills/`, etc., deben estar versionados.
+- El `GITIGNORE-GUIDE.md` explica la convención general; este repositorio contiene la excepción (documentación canónica).
+
+## Cambios recientes (2026-04-08)
+- **docs:** Added `Practice/IMPLEMENTACION/PR.MD` — Pull Request workflow guide.
+- **docs:** Updated `HITL.md` — Human-in-the-Loop principles.
+- **docs:** Updated `AGENTS.md` and various design docs under `Practice/DISEÑO/`.
+- **meta:** Alineado README con el estado actual del repositorio y las reglas de versionado de SDLC.
+
+---
+

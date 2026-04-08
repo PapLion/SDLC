@@ -1,887 +1,291 @@
-# 🎨 UI/UX Design — Discord Game Bot
+# UI-UX.md — Diseño de Interfaz y Experiencia
 
-> En un bot de Discord no hay pantallas ni wireframes.
-> El "UI" es la experiencia conversacional completa —
-> embeds, comandos, flujos, feedback y consistencia visual.
-> Todo implementado directamente. Sin mockups.
+> Este documento define el sistema de diseño y la experiencia del usuario.
+> Se completa DESPUÉS de CLIENT-REQUIREMENTS.md y ANTES de implementar.
+> El agente consulta este archivo para mantener consistencia visual total.
+>
+> Adaptar según el tipo de interfaz del proyecto:
+> → Web app / dashboard → completar secciones 1-7
+> → API sin UI → completar solo secciones 5-7 (UX de errores y respuestas)
+> → Bot / CLI → adaptar paleta y lenguaje al contexto
 
 ---
 
 ## 1. Design System — Paleta de Colores
 
-Cada tipo de embed tiene un color hexadecimal fijo definido en EmbedFactory.
-Consistencia visual en todo el bot — el jugador identifica el tipo de mensaje por el color antes de leer.
+Definir los colores del sistema con su semántica. Consistencia total: el usuario identifica el tipo de mensaje por el color antes de leer.
 
-```typescript
-export const EMBED_COLORS = {
-  // Juegos
-  GAME_ANNOUNCE:   0x5865F2,  // Blurple Discord — anuncio de juego
-  LOBBY:           0x5865F2,  // Blurple Discord — lobby activo
-  ROUND_START:     0xFEE75C,  // Amarillo — ronda iniciando, atención
-  ROUND_RESULT:    0x57F287,  // Verde — resultado correcto
-  ROUND_TIMEOUT:   0xED4245,  // Rojo — tiempo agotado
-  GAME_END:        0xFFD700,  // Dorado — fin de juego, ganador
+```
+PRIMARIOS (brand)
+Primary:     #[hex]   — acción principal, CTAs, links
+Secondary:   #[hex]   — elementos secundarios, hover states
+Background:  #[hex]   — fondo de la app
+Surface:     #[hex]   — cards, modales, paneles
 
-  // Premios
-  WINNER_DM:       0xFFD700,  // Dorado — DM de victoria
-  PRIZE_DROP:      0xEB459E,  // Rosa — drop aleatorio
-  DAILY_REWARD:    0x57F287,  // Verde — daily claim exitoso
-  REWARD_CLAIMED:  0x57F287,  // Verde — premio reclamado
+SEMÁNTICOS (estado)
+Success:     #[hex]   — operación exitosa, confirmación
+Error:       #[hex]   — error, acción destructiva, alerta crítica
+Warning:     #[hex]   — advertencia, atención requerida
+Info:        #[hex]   — información neutral, ayuda
 
-  // Perfil / Stats
-  SCORE:           0x5865F2,  // Blurple — perfil del jugador
-  LEADERBOARD:     0xFFD700,  // Dorado — rankings
-  INVENTORY:       0x5865F2,  // Blurple — inventario
-  HISTORY:         0x5865F2,  // Blurple — historial
+TEXTO
+Text Primary:   #[hex]   — texto principal
+Text Secondary: #[hex]   — texto de apoyo, labels
+Text Disabled:  #[hex]   — estado deshabilitado
+Text On Dark:   #[hex]   — texto sobre fondos oscuros
+```
 
-  // Sistema
-  ERROR:           0xED4245,  // Rojo — errores
-  WARNING:         0xFEE75C,  // Amarillo — advertencias
-  INFO:            0x5865F2,  // Blurple — información general
-  SUCCESS:         0x57F287,  // Verde — confirmaciones
-  ADMIN:           0xEB459E,  // Rosa — acciones admin
+**Regla:** Los colores semánticos son constantes. `error` siempre es `error`, sin importar el contexto.
 
-  // Juegos especiales
-  SPECIAL_GAME:    0xF47FFF,  // Púrpura claro — eventos especiales
-  TOURNAMENT:      0xFFD700,  // Dorado — torneos
-}
+---
+
+## 2. Design System — Tipografía
+
+```
+Font Family:    [nombre — ej: Inter, sistema]
+Font Scale:
+  xs:   12px / 0.75rem  — labels pequeños, timestamps
+  sm:   14px / 0.875rem — body secundario, captions
+  base: 16px / 1rem     — body principal
+  lg:   18px / 1.125rem — subtítulos
+  xl:   20px / 1.25rem  — títulos de sección
+  2xl:  24px / 1.5rem   — títulos de página
+  3xl:  30px / 1.875rem — hero, display
+
+Font Weight:
+  Regular: 400  — body
+  Medium:  500  — labels, elementos interactivos
+  Bold:    700  — títulos, énfasis
 ```
 
 ---
 
-## 2. Design System — Emojis y Lenguaje Visual
+## 3. Design System — Componentes Base
 
-Emojis consistentes en todo el bot. El jugador aprende el lenguaje visual rápido.
+Para cada componente definir los estados visuales. La IA implementa según estos estados, no inventa otros.
 
+### Botones
 ```
-ESTADO DE JUEGO
-🎮  → juego / gaming
-🎯  → ronda activa
-🏆  → ganador / victoria
-👑  → primer lugar
-⏱️  → countdown / tiempo
-👥  → jugadores en lobby
-✅  → correcto / unido / éxito
-❌  → incorrecto / cancelado / error
-📊  → scores / estadísticas
+Primary:    fondo Primary, texto blanco — acción principal
+Secondary:  borde Primary, texto Primary — acción alternativa
+Destructive: fondo Error, texto blanco — acciones irreversibles
+Ghost:      transparente, texto Primary — acciones terciarias
 
-PREMIOS
-💰  → coins
-🎁  → regalo / premio
-🏅  → badge
-🎲  → juego de suerte
-🔮  → item especial
-🎫  → redeem code
-🔑  → special access
-⚡  → reaction speed item
-📚  → trivia item
-
-SISTEMA
-🔥  → streak activo
-💔  → streak roto
-⚠️  → advertencia
-📋  → lista / reporte admin
-🌟  → legendary / especial
-👤  → perfil de usuario
-📈  → estadísticas / winrate
-🥇  → favorito / mejor
+Estados: default | hover | active | disabled | loading
 ```
 
----
-
-## 3. Design System — Tipografía y Estructura de Embeds
-
-Todas las reglas que EmbedFactory debe seguir para consistencia total.
-
+### Inputs y Formularios
 ```
-REGLAS GENERALES:
-→ Títulos: siempre con emoji al inicio
-→ Separador visual: ━━━━━━━━━━━━━━━━━━━━━━━━
-→ Campos: nombre en negrita implícita (Discord los hace bold)
-→ Footer: siempre presente con contexto útil
-→ Thumbnail: avatar del bot o icono del juego cuando aplica
-→ Timestamp: solo en embeds de historial y audit
+Default:  borde gris, fondo blanco
+Focus:    borde Primary, sin outline nativo
+Error:    borde Error + mensaje de error debajo
+Disabled: fondo gris claro, cursor not-allowed
+Success:  borde Success (cuando aplica validación inline)
+```
 
-LONGITUD:
-→ Títulos: máx 50 caracteres
-→ Descripciones: máx 200 caracteres
-→ Field values: máx 100 caracteres
-→ Footer: máx 80 caracteres
+### Feedback al Usuario
+```
+Toast / Notificación:
+  Success: ícono ✓, fondo Success tono claro, texto Success oscuro
+  Error:   ícono ✗, fondo Error tono claro, texto Error oscuro
+  Warning: ícono !, fondo Warning tono claro
+  Info:    ícono i, fondo Info tono claro
 
-TONO:
-→ Mensajes de victoria: energético, celebratorio
-→ Mensajes de error: claro, directo, siempre con solución
-→ Mensajes admin: formal, informativo
-→ Contdowns: urgente, conciso
+Loading:
+  Spinner: [definir si es global, inline, o skeleton]
+  Skeleton: preferible para contenido que tarda > 300ms
+
+Empty States:
+  Ilustración (o ícono) + título + descripción + CTA (si aplica)
+  Cada pantalla vacía explica qué hacer para poblarla
+```
+
+### Mensajes de Error
+```
+REGLA: Todo mensaje de error incluye qué hacer a continuación.
+El usuario nunca queda sin una acción clara.
+
+Formato:
+  Título: [qué salió mal — claro y directo]
+  Descripción: [por qué ocurrió — opcional si es obvio]
+  Acción: [qué hacer — botón o instrucción]
 ```
 
 ---
 
-## 4. Ciclo de Vida Visual Completo de un Juego
+## 4. Flujos de UX — Pantallas Principales
 
-Todo el flujo de un juego desde !start hasta !reward — mensaje por mensaje.
+Documentar el flujo completo de cada caso de uso principal. Mensaje por mensaje, pantalla por pantalla.
+
+### Flujo 1 — [Nombre del flujo principal]
+
+```
+[Estado inicial]
+  ↓ [acción del usuario]
+[Estado siguiente]
+  ↓ [acción]
+[Estado final exitoso]
+
+[Flujo de error]
+  ↓ [condición de error]
+[Estado de error con mensaje + acción]
+```
+
+### Flujo 2 — [Nombre]
+```
+[documentar de la misma manera]
+```
+
+> Completar un flujo por cada caso de uso definido en CLIENT-REQUIREMENTS.md
 
 ---
 
-### 4.1 Fase 1 — Anuncio de Juego (!start)
+## 5. Lenguaje Visual y Tono
 
 ```
-COLOR: 0x5865F2 (Blurple)
-ACCIÓN: Nuevo mensaje — bot lo guarda para editar
+Tono general:  [formal / amigable / técnico / casual]
+               Ejemplos del proyecto: [escribir 2-3 ejemplos reales]
 
-┌────────────────────────────────────────┐
-│ 🎮 TRIVIA CHALLENGE                    │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ 👥 Jugadores: 0/10                     │
-│ ⏱️  Inicio en: 30s                     │
-│ 💰 Premio: 100 Coins + 🏅 Rare Badge   │
-│                                        │
-│ Escribe !join para participar          │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ 📋 Iniciado por @Admin                 │
-└────────────────────────────────────────┘
-```
+Mensajes de éxito:   [cómo suena — ej: "¡Listo! Tu pago fue procesado."]
+Mensajes de error:   [cómo suena — ej: "No pudimos procesar el pago. Intenta de nuevo."]
+Mensajes de carga:   [cómo suena — ej: "Procesando..."]
+CTAs:                [cómo suena — ej: "Confirmar" no "Hacer click aquí"]
 
----
-
-### 4.2 Fase 2 — Lobby Activo (mensaje editado cada 5s)
-
-```
-COLOR: 0x5865F2 (Blurple) — mismo mensaje, editado
-ACCIÓN: LiveMessageManager.updateLobby() cada 5s
-
-┌────────────────────────────────────────┐
-│ 🎮 TRIVIA CHALLENGE — LOBBY            │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ ✅ @Player1                            │
-│ ✅ @Player2                            │
-│ ✅ @Player3                            │
-│ 👥 3/10 jugadores                      │
-│ ⏱️  Inicio en: 18s                     │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ Todavía puedes unirte con !join        │
-└────────────────────────────────────────┘
-```
-
----
-
-### 4.3 Fase 3 — Inicio de Ronda
-
-```
-COLOR: 0xFEE75C (Amarillo) — nuevo mensaje por ronda
-ACCIÓN: Nuevo mensaje enviado
-
-┌────────────────────────────────────────┐
-│ 🎯 RONDA 1 / 5                         │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ ❓ ¿Cuál es la capital de Japón?       │
-│                                        │
-│ ⏱️  15 segundos para responder         │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ Escribe tu respuesta en el chat        │
-└────────────────────────────────────────┘
+Reglas de lenguaje:
+→ [ej: No usar jerga técnica en mensajes de usuario]
+→ [ej: Verbos en imperativo para CTAs]
+→ [ej: Siempre en [idioma], sin mezclar]
 ```
 
 ---
 
-### 4.4 Fase 4 — Resultado de Ronda (mensaje editado)
+## 6. Reglas UX Generales
 
 ```
-COLOR: 0x57F287 (Verde) — respuesta correcta
-COLOR: 0xED4245 (Rojo)  — tiempo agotado / nadie respondió
-ACCIÓN: LiveMessageManager edita el mensaje de ronda
-
-[CORRECTO]
-┌────────────────────────────────────────┐
-│ ✅ @Player2 respondió primero!         │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ Respuesta: Tokio ✓                     │
-│ +10 puntos                             │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ 📊 Player1: 0  |  Player2: 10  |  Player3: 0 │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ Siguiente ronda en 3s...               │
-└────────────────────────────────────────┘
-
-[TIMEOUT]
-┌────────────────────────────────────────┐
-│ ⏱️  ¡Tiempo agotado!                   │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ Nadie respondió correctamente          │
-│ Respuesta correcta: Tokio              │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ 📊 Player1: 0  |  Player2: 0  |  Player3: 0 │
-└────────────────────────────────────────┘
-```
-
----
-
-### 4.5 Fase 5 — Fin de Juego
-
-```
-COLOR: 0xFFD700 (Dorado)
-ACCIÓN: Nuevo mensaje final
-
-┌────────────────────────────────────────┐
-│ 🏆 JUEGO TERMINADO                     │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ 👑 Ganador: @Player2                   │
-│ 📊 Score final: 30 puntos              │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ 1st 👑 @Player2  — 30pts              │
-│ 2nd 🥈 @Player1  — 20pts              │
-│ 3rd 🥉 @Player3  — 10pts              │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ 💰 Premio pendiente para @Player2     │
-│ Usa !reward para reclamar tu premio   │
-└────────────────────────────────────────┘
-```
-
----
-
-### 4.6 Fase 6 — DM al Ganador (!reward)
-
-```
-COLOR: 0xFFD700 (Dorado)
-ACCIÓN: DM privado — template exacto del cliente
-
-┌────────────────────────────────────────┐
-│ 🎉 You Won!                            │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ 🏆 Game:    Trivia Challenge           │
-│ 💰 Prize:   100 Coins                 │
-│ 🎁 Reward:  Rare Badge                │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ Your prize has been added to          │
-│ your account!                         │
-└────────────────────────────────────────┘
-
-[FALLBACK — DM falla, mismo mensaje en canal]
-┌────────────────────────────────────────┐
-│ 🎉 You Won! — @Player2                 │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ 📢 No pudimos enviarte un DM          │
-│ 🏆 Game:    Trivia Challenge           │
-│ 💰 Prize:   100 Coins                 │
-│ 🎁 Reward:  Rare Badge                │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ Your prize has been added to          │
-│ your account!                         │
-└────────────────────────────────────────┘
-```
-
----
-
-## 5. Embeds por Comando — Diseño Completo
-
-### !score — Perfil del Jugador
-
-```
-COLOR: 0x5865F2 (Blurple)
-
-┌────────────────────────────────────────┐
-│ 👤 @Player1                            │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ 💰 Coins:          1,250               │
-│ 🏆 Victorias:      23                  │
-│ 🎮 Partidas:       47                  │
-│ 🔥 Streak:         5 días              │
-│ 📊 Winrate:        48%                 │
-│ 🥇 Juego fav:      Trivia              │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ Últimas victorias:                     │
-│ • 🎯 Trivia     — hace 2h              │
-│ • 🎲 Dice       — hace 1d              │
-│ • 🔢 Math       — hace 3d              │
-└────────────────────────────────────────┘
-```
-
----
-
-### !leaderboard — Rankings
-
-```
-COLOR: 0xFFD700 (Dorado)
-
-┌────────────────────────────────────────┐
-│ 🏆 LEADERBOARD                         │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ 👑 1.  @Player2    — 3,450 coins       │
-│ 🥈 2.  @Player5    — 2,890 coins       │
-│ 🥉 3.  @Player1    — 1,250 coins       │
-│    4.  @Player8    —   980 coins       │
-│    5.  @Player3    —   750 coins       │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ 📊 Actualizado hace 12s               │
-└────────────────────────────────────────┘
-```
-
----
-
-### !inventory — Inventario del Jugador
-
-```
-COLOR: 0x5865F2 (Blurple)
-
-┌────────────────────────────────────────┐
-│ 🎒 Inventario de @Player1              │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ 🏅 BADGES (2)                         │
-│ • Week Warrior  — Obtenido hace 3d    │
-│ • Trivia Master — Obtenido hace 1sem  │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ 🎮 ITEMS (3)                          │
-│ • 📚 Knowledge Scroll  [Trivia]       │
-│ • 🧠 Genius Crown      [Trivia]       │
-│ • 🎲 Lucky Dice        [Dice]         │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ 🔑 ACCESOS ESPECIALES (1)             │
-│ • Tournament Mode — Expira en 2d      │
-└────────────────────────────────────────┘
-```
-
----
-
-### !daily — Daily Reward
-
-```
-COLOR: 0x57F287 (Verde) — claim exitoso
-COLOR: 0xFEE75C (Amarillo) — ya reclamado hoy
-
-[EXITOSO]
-┌────────────────────────────────────────┐
-│ 🔥 Day 7 Streak!                       │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ 💰 Base:       +150 coins              │
-│ ⚡ Bonus:      +100 coins              │
-│ ✖️  Multiplier: x3.0                   │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ 💰 Total:      750 coins               │
-│ 🏅 Badge:      Week Warrior            │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ Vuelve mañana para mantener x3.0      │
-└────────────────────────────────────────┘
-
-[YA RECLAMADO]
-┌────────────────────────────────────────┐
-│ ⏱️  Ya reclamaste tu recompensa hoy    │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ 🔥 Streak actual: 7 días               │
-│ ⏳ Próximo claim: en 14h 23m           │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ ¡No rompas tu racha!                  │
-└────────────────────────────────────────┘
-
-[STREAK ROTO]
-┌────────────────────────────────────────┐
-│ 💔 Streak roto                         │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ Tu racha de 7 días se perdió          │
-│ Empezando desde día 1...              │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ 💰 Reward: 50 coins (base)            │
-│ Vuelve mañana para empezar racha      │
-└────────────────────────────────────────┘
-```
-
----
-
-### !history — Historial de Victorias
-
-```
-COLOR: 0x5865F2 (Blurple)
-
-┌────────────────────────────────────────┐
-│ 📋 Historial de @Player1               │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ 🏆 23 victorias totales                │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ 🎯 Trivia    — 100 coins  — hace 2h   │
-│ 🎲 Dice      — Badge      — hace 1d   │
-│ 🔢 Math      — 50 coins   — hace 3d   │
-│ ⚡ Reaction  — Item       — hace 5d   │
-│ 📖 WordGame  — 75 coins   — hace 1sem │
-└────────────────────────────────────────┘
-```
-
----
-
-### !games list — Lista de Juegos
-
-```
-COLOR: 0x5865F2 (Blurple)
-
-┌────────────────────────────────────────┐
-│ 🎮 JUEGOS DISPONIBLES                  │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ 🎯 trivia        — 3-5min  — 💰+🏅    │
-│ ⚡ reaction      — 30s     — 💰       │
-│ 🔢 math          — 2-3min  — 💰       │
-│ 📖 wordpuzzle    — 3min    — 💰+🎮    │
-│ 🎲 dice          — 1min    — 💰       │
-│ 🎡 spinwheel     — 30s     — 💰+🎮    │
-│ 🔮 guessing      — 2min    — 💰       │
-│ 🗡️  elimination   — 5min    — 💰+🏅    │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ 🌟 ESPECIALES (requieren acceso)       │
-│ 👑 tournament    — evento              │
-│ ⚔️  bossbattle    — evento              │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ !games info [nombre] para más detalles │
-└────────────────────────────────────────┘
-```
-
----
-
-### !games info [nombre]
-
-```
-COLOR: 0x5865F2 (Blurple)
-
-┌────────────────────────────────────────┐
-│ 🎯 TRIVIA CHALLENGE                    │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ 📝 Responde preguntas antes que        │
-│    los demás. El más rápido gana.      │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ ⏱️  Duración:    3-5 minutos           │
-│ 👥 Jugadores:   2-10                   │
-│ 🔄 Rondas:      5                      │
-│ 💰 Premio:      100 coins + Rare Badge │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ !start trivia para comenzar           │
-└────────────────────────────────────────┘
-```
-
----
-
-### Prize Drop — Drop Aleatorio
-
-```
-COLOR: 0xEB459E (Rosa)
-ACCIÓN: Nuevo mensaje — bot lo guarda para detectar reacción
-
-┌────────────────────────────────────────┐
-│ 🎁 ¡PRIZE DROP!                        │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ 💰 Premio: 200 Coins                   │
-│                                        │
-│ ⚡ Reacciona con 🎁 para ganar         │
-│ ⏱️  Tienes 30 segundos                 │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ ¡El primero en reaccionar gana!       │
-└────────────────────────────────────────┘
-
-[GANADOR ENCONTRADO]
-┌────────────────────────────────────────┐
-│ 🎉 @Player3 ganó el drop!              │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ 💰 Premio: 200 Coins añadidos          │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ Usa !reward para reclamar              │
-└────────────────────────────────────────┘
-
-[NADIE REACCIONÓ]
-┌────────────────────────────────────────┐
-│ ⏱️  Drop expirado                      │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ Nadie reclamó el premio a tiempo      │
-│ El siguiente drop llegará pronto...   │
-└────────────────────────────────────────┘
-```
-
----
-
-### !prizes pending — Admin Panel
-
-```
-COLOR: 0xEB459E (Rosa — admin)
-
-┌────────────────────────────────────────┐
-│ 📋 PREMIOS PENDIENTES DE ENTREGA       │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ #001 @Player1 → Redeem Code            │
-│      Juego: Trivia | Hace 2h          │
-│                                        │
-│ #002 @Player2 → Physical Prize         │
-│      Juego: Tournament | Hace 1d      │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ !prizes confirm [id] → marcar entregado│
-└────────────────────────────────────────┘
-```
-
----
-
-### Mensajes de Error — Todos los Casos
-
-```
-COLOR: 0xED4245 (Rojo) — siempre
-
-[PERMISO INSUFICIENTE]
-┌────────────────────────────────────────┐
-│ ❌ Sin permisos                        │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ Necesitas rol Admin para usar !start  │
-└────────────────────────────────────────┘
-
-[COOLDOWN ACTIVO]
-┌────────────────────────────────────────┐
-│ ⏱️  Cooldown activo                    │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ Espera 1.5s antes de usar !play       │
-└────────────────────────────────────────┘
-
-[LOBBY LLENO]
-┌────────────────────────────────────────┐
-│ ❌ Lobby lleno                         │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ El juego ya tiene 10/10 jugadores     │
-│ Espera el próximo juego               │
-└────────────────────────────────────────┘
-
-[JUEGO YA INICIADO]
-┌────────────────────────────────────────┐
-│ ❌ Juego en curso                      │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ No puedes unirte, el juego ya empezó  │
-│ Espera la próxima sesión              │
-└────────────────────────────────────────┘
-
-[SIN JUEGO ACTIVO]
-┌────────────────────────────────────────┐
-│ ❌ Sin juego activo                    │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ No hay ningún juego en este momento   │
-│ Usa !games list para ver opciones     │
-└────────────────────────────────────────┘
-
-[SIN PREMIOS PENDIENTES]
-┌────────────────────────────────────────┐
-│ ❌ Sin premios pendientes              │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ No tienes premios por reclamar        │
-│ ¡Juega para ganar uno!                │
-└────────────────────────────────────────┘
-
-[ANTICHEAT — RESPUESTA INHUMANA]
-┌────────────────────────────────────────┐
-│ ⚠️  Respuesta sospechosa               │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ Tu respuesta fue demasiado rápida     │
-│ Advertencia 1/3                       │
-└────────────────────────────────────────┘
-
-[ANTICHEAT — BAN TEMPORAL]
-┌────────────────────────────────────────┐
-│ 🚫 Timeout aplicado                   │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ Comportamiento sospechoso detectado   │
-│ No puedes jugar por 5 minutos         │
-└────────────────────────────────────────┘
-```
-
----
-
-### Mensajes de Éxito / Confirmación
-
-```
-COLOR: 0x57F287 (Verde)
-
-[JUEGO CANCELADO — SIN JUGADORES]
-┌────────────────────────────────────────┐
-│ ❌ Juego cancelado                     │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ No hay suficientes jugadores (min. 2) │
-│ Usa !start [juego] para intentar      │
-│ de nuevo                              │
-└────────────────────────────────────────┘
-
-[CUSTOM GAME CREADO]
-┌────────────────────────────────────────┐
-│ ✅ Movie Trivia creado                 │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ Tipo: Trivia  |  Rondas: 5  |  20s   │
-│ Premio: 200 coins                     │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ !start movietrivia para jugarlo       │
-└────────────────────────────────────────┘
-
-[CODES CARGADOS — !addcodes]
-┌────────────────────────────────────────┐
-│ ✅ Códigos cargados                    │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ 15 redeem codes disponibles           │
-│ Registrado en audit log               │
-└────────────────────────────────────────┘
-
-[ERROR !addcodes — formato inválido]
-┌────────────────────────────────────────┐
-│ ❌ Formato inválido                    │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ Adjunta un archivo .txt con un        │
-│ código por línea                      │
-│ Ejemplo: CODE001                      │
-└────────────────────────────────────────┘
-```
-
----
-
-## 6. Flujos de UX por Juego
-
-### Reaction Speed
-```
-Bot: [embed ROUND_START 0xFEE75C]
-     "⚡ ¡AHORA! — primero en escribir !play gana"
-         ↓
-Jugadores escriben !play
-         ↓
-Bot detecta primero (>80ms para ser válido)
-         ↓
-Bot: [embed ROUND_RESULT 0x57F287]
-     "@Player1 ganó en 142ms! ⚡"
-         ↓
-[Si nadie responde en 30s]
-Bot: [embed ROUND_TIMEOUT 0xED4245]
-     "⏱️ Nadie fue suficientemente rápido
-      Usa !start reaction para intentar de nuevo"
-```
-
----
-
-### Elimination
-```
-Bot: [ROUND_START] "@Player3 — tu turno"
-     Pregunta visible para todos
-         ↓
-Solo @Player3 responde
-         ↓
-[CORRECTO] Bot: "@Player3 sobrevivió ✅ — quedan 4"
-[INCORRECTO] Bot: "@Player3 fue eliminado ❌ — quedan 3"
-         ↓
-[1 jugador queda]
-Bot: [GAME_END 0xFFD700] "👑 @Player2 — último sobreviviente!"
-```
-
----
-
-### Spin Wheel
-```
-Bot: [ANNOUNCE] "🎡 SPIN WHEEL — todos pueden unirse con !join"
-         ↓
-Bot: [ROUND_START 0xFEE75C]
-     "🎡 Girando la ruleta..."
-     [3s de suspenso visual — mensaje editado con puntos ...]
-         ↓
-Bot: [GAME_END 0xFFD700]
-     "🎡 La ruleta se detuvo en... @Player2!
-      👑 Ganador seleccionado por suerte"
-```
-
----
-
-### Guessing
-```
-Bot: [ROUND_START] "🔮 Adivina el número entre 1 y 100
-                   Tienes 2 minutos — ¡sin límite de intentos!"
-         ↓
-Jugadores envían números en chat
-         ↓
-Bot responde a cada intento:
-     "📈 Demasiado alto" / "📉 Demasiado bajo" / "✅ ¡Correcto!"
-         ↓
-[Empate] Bot: "🤝 @Player1 y @Player2 adivinaron con la
-               misma distancia — premio dividido"
-```
-
----
-
-## 7. UX del Wizard — !createGame (Admin en DM)
-
-```
-[PASO 1]
-Bot DM: "🎮 Vamos a crear tu juego personalizado
-         ━━━━━━━━━━━━━━━━━━━━━━━━━━
-         ¿Cómo se llamará tu juego? (máx 30 chars)"
-
-Admin: "Movie Trivia"
-
-[PASO 2]
-Bot DM: "¿En qué tipo base se basa?
-         1️⃣  Trivia
-         2️⃣  Reaction
-         3️⃣  Guessing
-         4️⃣  Elimination
-         5️⃣  Luck
-         Responde con el número"
-
-Admin: "1"
-
-[PASO 3]
-Bot DM: "¿Cuántas rondas? (1-10)"
-Admin: "5"
-
-[PASO 4]
-Bot DM: "¿Segundos por ronda? (10-60)"
-Admin: "20"
-
-[PASO 5]
-Bot DM: "¿Qué premio otorga?
-         1️⃣  Coins
-         2️⃣  Badge
-         3️⃣  Virtual Item
-         4️⃣  Role
-         5️⃣  Redeem Code"
-
-Admin: "1"
-
-Bot DM: "¿Cuántos coins?"
-Admin: "200"
-
-[PASO 6 — Solo si base = Trivia]
-Bot DM: "Envía tus preguntas en este formato
-         (mínimo 5, máximo 20):
-
-         pregunta | respuesta
-         pregunta | respuesta
-
-         Ejemplo:
-         ¿Quién dirigió Titanic? | James Cameron"
-
-Admin: envía lista
-
-[PASO 7 — Confirmación]
-┌────────────────────────────────────────┐
-│ 📋 RESUMEN DE TU JUEGO                 │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ Nombre:     Movie Trivia               │
-│ Tipo:       Trivia                     │
-│ Rondas:     5 × 20s                    │
-│ Premio:     200 coins                  │
-│ Preguntas:  8 cargadas                 │
-│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│ Reacciona ✅ para confirmar           │
-│ Reacciona ❌ para cancelar            │
-└────────────────────────────────────────┘
-
-[CONFIRMADO]
-Bot DM: "✅ Movie Trivia creado exitosamente
-         !start movietrivia para jugarlo en el servidor"
-
-[CANCELADO]
-Bot DM: "❌ Creación cancelada
-         Usa !createGame para empezar de nuevo"
-```
-
----
-
-## 8. UX Reglas Generales
-
-```
-REGLA 1 — Sin spam
-→ El bot nunca envía múltiples mensajes seguidos donde
-  puede editar uno solo (LiveMessageManager)
-→ Countdowns editados cada 5s en el mismo mensaje
+REGLA 1 — Feedback inmediato
+→ Toda acción del usuario recibe respuesta visual en < 100ms
+→ Si hay procesamiento largo: mostrar loading inmediatamente
+→ No dejar al usuario sin feedback nunca
 
 REGLA 2 — Siempre hay una acción siguiente
-→ Todo mensaje de error incluye qué hacer
-→ "Usa !games list", "Espera el próximo juego", etc.
-→ El jugador nunca queda perdido
+→ Cada mensaje de error incluye qué hacer
+→ Cada estado vacío incluye cómo poblarlo
+→ El usuario nunca queda atrapado sin salida
 
-REGLA 3 — Feedback inmediato
-→ Cada comando recibe respuesta en < 1s
-→ Si hay procesamiento largo → "⏳ Procesando..." primero
+REGLA 3 — Consistencia total
+→ Un color = un significado, siempre
+→ Un componente = mismos estados, siempre
+→ El design system es la única fuente de estilos
 
-REGLA 4 — Consistencia total
-→ EmbedFactory es la ÚNICA fuente de embeds
-→ Nunca mensajes de texto plano excepto en wizard DM
-→ Mismo color = mismo tipo de mensaje, siempre
+REGLA 4 — Jerarquía visual clara
+→ Una sola acción primaria por pantalla
+→ El CTA principal es visualmente dominante
+→ Lo secundario es visualmente secundario
 
-REGLA 5 — Admin vs Jugador
-→ Mensajes de admin en DM cuando es información sensible
-→ Mensajes de jugador en canal siempre
-→ Wizard de !createGame siempre en DM
+REGLA 5 — Accesibilidad mínima
+→ Contraste de texto: mínimo 4.5:1 (WCAG AA)
+→ Focus visible en todos los elementos interactivos
+→ No depender solo del color para comunicar estado
+→ Labels en todos los inputs (no solo placeholders)
 
-REGLA 6 — Lenguaje
-→ Mensajes de juego: inglés (cliente lo especificó en DM template)
-→ Mensajes de error/sistema: inglés
-→ Consistencia total — no mezclar idiomas
-
-REGLA 7 — Escalabilidad visual
-→ Leaderboard máx 10 entradas
-→ Inventory paginado si > 10 items (usando botones Discord)
-→ History máx 5 entradas recientes
+[Agregar reglas específicas del proyecto]
 ```
 
 ---
 
-## 9. Componente EmbedFactory — Referencia Completa
+## 7. Responsive y Breakpoints (si aplica)
 
-Todos los métodos que debe implementar EmbedFactory.ts:
+```
+Mobile:   < 640px   → [comportamiento específico del proyecto]
+Tablet:   640-1024px → [comportamiento]
+Desktop:  > 1024px  → [comportamiento]
 
-```typescript
-class EmbedFactory {
-  // Ciclo de vida del juego
-  static gameAnnounce(data: GameAnnounceData): EmbedBuilder
-  static gameLobby(data: LobbyState): EmbedBuilder
-  static roundStart(data: RoundStartData): EmbedBuilder
-  static roundResult(data: RoundResultData): EmbedBuilder
-  static roundTimeout(data: RoundTimeoutData): EmbedBuilder
-  static gameEnd(data: GameEndData): EmbedBuilder
+Comportamiento en mobile:
+→ [ej: navegación pasa a bottom bar]
+→ [ej: tablas colapsan a cards]
+→ [ej: sidebar se convierte en drawer]
+```
 
-  // Premios
-  static winnerDM(data: WinnerDMData): EmbedBuilder
-  static winnerChannel(data: WinnerDMData): EmbedBuilder  // mismo formato
-  static prizeDrop(data: PrizeDropData): EmbedBuilder
-  static prizeDropWinner(data: PrizeDropWinnerData): EmbedBuilder
-  static prizeDropExpired(): EmbedBuilder
+---
 
-  // Comandos de jugador
-  static score(data: ScoreData): EmbedBuilder
-  static leaderboard(data: LeaderboardData): EmbedBuilder
-  static inventory(data: InventoryData): EmbedBuilder
-  static history(data: HistoryData): EmbedBuilder
-  static gamesList(data: GamesListData): EmbedBuilder
-  static gamesInfo(data: GameInfoData): EmbedBuilder
+## 8. Componente Principal — Referencia Completa
 
-  // Daily / Streak
-  static dailyClaim(data: DailyClaimData): EmbedBuilder
-  static dailyAlreadyClaimed(data: DailyAlreadyData): EmbedBuilder
-  static streakBroken(data: StreakBrokenData): EmbedBuilder
+Si el proyecto tiene un componente central (tabla, formulario complejo, canvas), documentarlo aquí con todos sus estados y variantes.
 
-  // Admin
-  static prizesPending(data: PrizesPendingData): EmbedBuilder
-  static codesLoaded(count: number): EmbedBuilder
-  static customGameCreated(data: CustomGameData): EmbedBuilder
-  static customGameSummary(data: CustomGameData): EmbedBuilder
+```
+[ComponentePrincipal]
+  Props requeridas: [listar]
+  Props opcionales: [listar]
+  Estados: [loading, empty, error, populated]
+  Variantes: [si las hay]
+  Eventos que emite: [onClick, onChange, etc.]
+```
 
-  // Sistema
-  static error(message: string, suggestion?: string): EmbedBuilder
-  static warning(message: string): EmbedBuilder
-  static success(message: string): EmbedBuilder
-  static info(message: string): EmbedBuilder
-  static cooldown(remaining: number): EmbedBuilder
-  static noPermission(requiredRole: string): EmbedBuilder
+---
+
+## 9. UX de la API (si el proyecto tiene API pública o interna)
+
+Aunque no haya UI, la API tiene UX. Consistencia en respuestas.
+
+### Respuestas de éxito
+```json
+// GET /resource
+{ "data": { ... }, "meta": { "total": 100 } }
+
+// POST /resource (creación)
+// Status 201
+{ "data": { "id": "...", ... } }
+
+// DELETE /resource (eliminación)
+// Status 204, sin body
+```
+
+### Respuestas de error
+```json
+// Formato estándar para todos los errores (RFC 7807)
+{
+  "type":   "https://errors.miapp.com/not-found",
+  "title":  "Recurso no encontrado",
+  "status": 404,
+  "detail": "El usuario con id '123' no existe",
+  "instance": "/api/users/123"
 }
 ```
 
+### Códigos de estado consistentes
+```
+200 → éxito, retorna data
+201 → creado exitosamente
+204 → eliminado, sin content
+400 → input inválido (error del cliente)
+401 → no autenticado
+403 → autenticado pero sin permisos
+404 → recurso no encontrado
+409 → conflicto (ej: email ya existe)
+422 → entidad no procesable (validación fallida)
+429 → rate limit
+500 → error interno del servidor
+```
+
+> Referencia: Api-Design.md (Theory/) — sección error handling, RFC 7807
+
 ---
 
-## 10. Checklist UI/UX — Verificación Final
+## 10. Checklist UI/UX — Verificación
 
 ```
-✅ Paleta de colores definida — 1 color por tipo de mensaje
-✅ Emojis estandarizados — lenguaje visual consistente
-✅ Tipografía y estructura de embeds — reglas claras
-✅ Ciclo de vida visual completo — anuncio → lobby → ronda → fin → DM
-✅ Template DM exacto del cliente — "You Won!" con todos los campos
-✅ Fallback DM → canal — mismo template, mención al usuario
-✅ Todos los comandos tienen embed diseñado
-✅ Todos los errores tienen embed con solución
-✅ Todos los edge cases tienen respuesta visual
-✅ Wizard !createGame en DM — flujo paso a paso
-✅ Real-time via message editing — sin spam
-✅ EmbedFactory — referencia completa de todos los métodos
-✅ Reglas UX generales — 7 reglas formalizadas
-✅ Flujos específicos por juego — Reaction, Elimination, Spin, Guessing
-✅ Sin mockups — diseño directo para implementación
+□ Paleta de colores definida con semántica clara
+□ Tipografía y escala definidas
+□ Componentes base con estados documentados
+□ Flujos principales documentados pantalla a pantalla
+□ Mensajes de error con acción siguiente siempre
+□ Tono y lenguaje definidos con ejemplos
+□ Reglas UX generales aplicables al proyecto
+□ Accesibilidad mínima considerada
+□ UX de API documentada (si aplica)
 ```
+
+---
+
+*Referencia: Frontend.md, Frontend-Performance.md (Theory/) para proyectos web*
+*Referencia: Api-Design.md, Technical-Writer.md (Theory/) para proyectos API*

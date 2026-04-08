@@ -1,0 +1,8 @@
+docs: add PR.md — Pull Request workflow
+
+Add Practice/IMPLEMENTACION/PR.MD documenting the mandatory PR workflow:
+- Repo state checks, formatting, conventional commits, PR generation.
+- Branch naming conventions and blocking criteria for merges.
+- Templates and commands for using gh CLI.
+
+Location: Practice/IMPLEMENTACION/PR.MD
