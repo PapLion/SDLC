@@ -1,59 +1,66 @@
-# PR.MD — Flujo de Pull Request
+# PR.md — Flujo de Pull Request
 
-Cuando se te pida generar un PR, ejecuta estos pasos en orden sin saltarte ninguno.
+> Este archivo es una instrucción directa para el agente de implementación.
+> Se lee al inicio de cada sesión de PR. No es negociable.
 
 ---
 
 ## Pasos obligatorios
 
+Ejecuta en este orden exacto. Sin saltar ninguno.
+
 ### 1. Estado del repositorio
 - Mostrar staged changes
 - Mostrar unstaged/uncommitted changes
-- Mostrar rama actual
+- Mostrar rama actual y rama base
 
 ### 2. Formatear y limpiar código
-- Ejecutar: `npm run format`
-- Stage los cambios de formato
+- Ejecutar el formateador del proyecto (`npm run format` / `ruff format` / lo que aplique)
+- Stage los cambios de formato antes del commit
 
 ### 3. Crear commit convencional
-Usar el tipo que se indique en la temática:
+
+Usar el tipo que corresponda:
 - `feat:` → nueva feature
 - `fix:` → corrección de bug o incompatibilidad
 - `refactor:` → refactoring sin cambio de comportamiento
 - `test:` → añadir o corregir tests
 - `docs:` → documentación
 - `chore:` → tareas de mantenimiento, dependencias
+- `perf:` → mejora de rendimiento sin cambio funcional
 
-Formato del mensaje:
+Formato:
 ```
-<tipo>: <descripción corta en inglés>
+<tipo>: <descripción corta en inglés, imperativo, sin punto final>
 
-- Detalle 1
+- Detalle 1 — qué cambió y por qué
 - Detalle 2
 - Detalle 3
 ```
 
-❌ Nunca usar: "fixed stuff", "updates", "WIP"
+❌ Nunca usar: "fixed stuff", "updates", "WIP", "changes", "misc"
 
 ### 4. Comparar con rama base y generar descripción del PR
-- Detectar rama base: master (este proyecto no usa main ni develop)
-- Generar diff contra master
-- Construir descripción estructurada:
 
-```
+- Detectar rama base del proyecto (main / master / develop)
+- Generar diff contra la rama base
+- Construir descripción con esta estructura:
+
+```markdown
 ## Summary
-<qué cambia y por qué>
+<qué cambia y por qué — 2-3 oraciones>
 
 ## Technical Details
-<detalles de implementación>
+<detalles de implementación relevantes para el revisor>
 
 ## Testing
 <cómo se verificó que funciona>
-- [ ] npm run build pasa
-- [ ] npm run test pasa (si aplica)
+- [ ] Build pasa sin errores
+- [ ] Tests corren en verde
+- [ ] Validación manual completada (si aplica)
 
 ## Related
-<bloque del ROADMAP que corresponde: R-A, R-B, etc.>
+<referencia al bloque del ROADMAP, issue, o tarea que corresponde>
 ```
 
 ### 5. Push y crear PR
@@ -65,27 +72,40 @@ gh pr view --web
 
 ---
 
-## Tipos de PR por bloque del ROADMAP
+## Convención de ramas
 
-| Bloque | Tipo de commit | Rama sugerida |
-|---|---|---|
-| R-A | feat | feat/block-1-foundation |
-| R-B | feat | feat/block-2-foundation |
-| R-C | feat | feat/block-3-permissions |
-| R-D | feat | feat/block-4-core-game |
-| R-E | feat | feat/block-5-prize-system |
-| R-F | feat | feat/block-6-games |
-| R-G | feat | feat/block-7-platform |
-| R-H | feat | feat/block-8-admin |
-| R-I | feat | feat/block-9-special-games |
-| R-J | feat | feat/block-10-hardening |
-| Fix cualquier bloque | fix | fix/<descripción-corta> |
+```
+<tipo>/<descripción-corta-en-kebab-case>
+
+feat/user-authentication
+feat/payment-integration
+fix/session-timeout
+refactor/database-layer
+docs/api-reference
+```
+
+La rama base depende del proyecto — verificar TECHLEAD.md o ROADMAP.md para confirmarlo.
+
+---
+
+## Criterios de bloqueo
+
+Un PR no puede mergearse si:
+- El build falla
+- Los tests existentes están en rojo
+- No tiene descripción de qué cambia y por qué
+- Tiene secretos o tokens hardcodeados
+- Tiene `console.log` / `print` de debugging en código de producción
 
 ---
 
 ## Uso
 
-Cuando se te diga:
-> "Lee PR.MD y genera un PR con temática X"
+Cuando se te pida:
+> "Lee PR.md y genera un PR con temática X"
 
-Ejecuta los 5 pasos de arriba usando X como la temática del commit.
+Ejecuta los 5 pasos usando X como la temática del commit.
+
+---
+
+*Referencia: Code_Review_BestPractices.md, Code_Review_Pyramid.md (Theory/)*
